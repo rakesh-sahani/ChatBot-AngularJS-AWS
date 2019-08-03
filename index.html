@@ -1,0 +1,153 @@
+<html>
+
+<head>
+    <title>ChatBot</title>
+</head>
+<link rel="stylesheet" href="style.css" />
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" />
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+<!-- <link rel="stylesheet" href="/css/style.css" />
+<link rel="stylesheet" href="/css/bootstrap.min.css" />
+<link rel="stylesheet" href="/css/font-awesome.min.css" />
+<script src="/js/angular.min.js"></script> -->
+
+<body ng-app="chatBot" ng-controller="botCtrl"></body>
+<div class="container">
+    <div class="msg-header">
+        <div class="msg-header-img">
+            <img src="user.png">
+        </div>
+        <div class="active">
+            <h4>Ryu</h4>
+            <h6>3 hours ago...</h6>
+        </div>
+        <div class="header-icons">
+            <i class="fa fa-times-circle"></i>
+        </div>
+    </div>
+    <div class="chat-page">
+        <div class="msg-inbox">
+            <div class="chats">
+                <div class="msg-page">
+                    <!-- <div class="received-chats">
+                        <div class="received-chats-img">
+                            <img src="user.png">
+                        </div>
+                        <div class="received-msg">
+                            <div class="received-msg-inbox">
+                                <p>Hiiii I am Rex the ChatBot</p>
+                                <span class="time">11:00 PM</span>
+                            </div>
+                        </div>
+                    </div> -->
+                    <div ng-repeat="msg in chatMessage track by $index" class="{{msg.css}}-chats">
+                        <div class="{{msg.css}}-chats-img">
+                            <img src="user.png">
+                        </div>
+                        <div class="{{msg.css}}-msg">
+                            <div class="{{msg.css}}-msg-inbox">
+                                <p>{{msg.text}}</p>
+                                <span class="time">11:00 PM</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- <div class="received-chats" ng-repeat="receive in receiveMessage">
+                        <div class="received-chats-img">
+                            <img src="user.png">
+                        </div>
+                        <div class="received-msg">
+                            <div class="received-msg-inbox">
+                                <p>{{receive}}</p>
+                                <span class="time">11:00 PM</span>
+                            </div>
+                        </div>
+                    </div>
+-->
+
+                    <!-- <div class="outgoing-chats">
+                        <div class="outgoing-msg-inbox">
+                            <p>ffsdfsdfsdf</p>
+                            <span class="time">11:00 PM</span>
+                        </div>
+                        <div class="outgoing-chats-img">
+                            <img src="user1.png">
+                        </div>
+                    </div> -->
+                </div>
+            </div>
+        </div>
+        <div class="msg-bottom">
+            <div class="bottom-icons">
+
+            </div>
+            <div class="input-group">
+                <input type="text" class="form-control" placeholder="Message..." ng-model="textSent" />
+                <div class="input-group-append">
+                    <span class="input-group-text">
+                            <i class="fa fa-paper-plane" ng-click=send(textSent)></i>
+                        </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+
+<script>
+    var app = angular.module('chatBot', []);
+    app.controller('botCtrl', function($scope, $timeout) {
+
+
+        $scope.chatMessage = [];
+        $scope.userMessage = {};
+        $scope.botMessage = {};
+        $scope.index = 0;
+        //$scope.chatMessage.* = [];
+
+
+
+
+        $scope.receive = function(type) {
+            $scope.botMessage.text = "Hi,I am Rex MyJoiningBot";
+            $scope.botMessage.css = "received";
+            $scope.botMessage.type = type;
+            let bot = {...$scope.botMessage
+            };
+            $scope.chatMessage.push(bot);
+            $scope.textSent = '';
+            // if ($scope.chatMessage.length != 0 || $scope.chatMessage.length == 0) {
+            //     // $scope.chatMessage.push($scope.userMessage);
+            //     let msg = [];
+            //     msg.push($scope.userMessage);
+            //     $scope.chatMessage = msg;
+            //     //   $timeout(function() {
+            //     //     $scope.chatMessage.push($scope.userMessage);
+            //     //}, 2000);
+            // }
+            console.log($scope.chatMessage);
+        }
+
+        //$scope.receive();
+
+        $scope.send = function(textSent) {
+            $scope.userMessage.text = textSent;
+            $scope.userMessage.css = "outgoing";
+            $scope.userMessage.type = "user";
+            let user = {...$scope.userMessage
+            };
+            $scope.chatMessage.push(user);
+            // if ($scope.chatMessage.length != 0 || $scope.chatMessage.length == 0) {
+            //     let msg = [];
+            //     msg.push($scope.userMessage);
+            //     $scope.chatMessage = msg;
+            // }
+            console.log($scope.chatMessage);
+            $scope.receive("bot");
+        }
+
+
+    });
+</script>
+
+</html>
