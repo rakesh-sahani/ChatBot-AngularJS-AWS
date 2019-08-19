@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" />
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+<script src="https://sdk.amazonaws.com/js/aws-sdk-2.512.0.min.js"></script>
 <!-- <link rel="stylesheet" href="/css/style.css" />
 <link rel="stylesheet" href="/css/bootstrap.min.css" />
 <link rel="stylesheet" href="/css/font-awesome.min.css" />
@@ -19,8 +20,7 @@
             <img src="user.png">
         </div>
         <div class="active">
-            <h4>Ryu</h4>
-            <h6>3 hours ago...</h6>
+            <h4>Talk to Bot</h4>
         </div>
         <div class="header-icons">
             <i class="fa fa-times-circle"></i>
@@ -30,17 +30,6 @@
         <div class="msg-inbox">
             <div class="chats">
                 <div class="msg-page">
-                    <!-- <div class="received-chats">
-                        <div class="received-chats-img">
-                            <img src="user.png">
-                        </div>
-                        <div class="received-msg">
-                            <div class="received-msg-inbox">
-                                <p>Hiiii I am Rex the ChatBot</p>
-                                <span class="time">11:00 PM</span>
-                            </div>
-                        </div>
-                    </div> -->
                     <div ng-repeat="msg in chatMessage track by $index" class="{{msg.css}}-chats">
                         <div class="{{msg.css}}-chats-img">
                             <img src="user.png">
@@ -48,38 +37,14 @@
                         <div class="{{msg.css}}-msg">
                             <div class="{{msg.css}}-msg-inbox">
                                 <p>{{msg.text}}</p>
-                                <span class="time">11:00 PM</span>
                             </div>
                         </div>
                     </div>
-                    <!-- <div class="received-chats" ng-repeat="receive in receiveMessage">
-                        <div class="received-chats-img">
-                            <img src="user.png">
-                        </div>
-                        <div class="received-msg">
-                            <div class="received-msg-inbox">
-                                <p>{{receive}}</p>
-                                <span class="time">11:00 PM</span>
-                            </div>
-                        </div>
-                    </div>
--->
-
-                    <!-- <div class="outgoing-chats">
-                        <div class="outgoing-msg-inbox">
-                            <p>ffsdfsdfsdf</p>
-                            <span class="time">11:00 PM</span>
-                        </div>
-                        <div class="outgoing-chats-img">
-                            <img src="user1.png">
-                        </div>
-                    </div> -->
                 </div>
             </div>
         </div>
         <div class="msg-bottom">
             <div class="bottom-icons">
-
             </div>
             <div class="input-group">
                 <input type="text" class="form-control" placeholder="Message..." ng-model="textSent" />
@@ -98,55 +63,67 @@
     var app = angular.module('chatBot', []);
     app.controller('botCtrl', function($scope, $timeout) {
 
+        const REGION = "us-east-1";
+        const POOL_ID = "us-east-1:84d6a94d-fe8c-4764-8cd8-d0ba6d01732e";
+
+
+        const myCredentials = new AWS.CognitoIdentityCredentials({
+            IdentityPoolId: POOL_ID
+        }, {
+            region: REGION
+        });
+
+        var params = {
+            botName: "BookTrip",
+            botAlias: "botwithcustomres",
+            userId: "varnit",
+            contentType: "text/plain; charset=utf-8",
+            accept: "text/plain; charset=utf-8"
+        };
+
+        var lexruntime = new AWS.LexRuntime({
+            region: REGION,
+            credentials: myCredentials
+        });
+
+        $scope.postContent = function(text) {
+            params.inputStream = text;
+            return new Promise((resolve, reject) => {
+                lexruntime.postContent(params, (err, data) => {
+                    if (err) {
+                        reject(err);
+                    }
+                    resolve(data);
+                });
+            });
+        }
+
 
         $scope.chatMessage = [];
         $scope.userMessage = {};
         $scope.botMessage = {};
         $scope.index = 0;
-        //$scope.chatMessage.* = [];
-
-
-
-
-        $scope.receive = function(type) {
-            $scope.botMessage.text = "Hi,I am Rex MyJoiningBot";
-            $scope.botMessage.css = "received";
-            $scope.botMessage.type = type;
-            let bot = {...$scope.botMessage
-            };
-            $scope.chatMessage.push(bot);
-            $scope.textSent = '';
-            // if ($scope.chatMessage.length != 0 || $scope.chatMessage.length == 0) {
-            //     // $scope.chatMessage.push($scope.userMessage);
-            //     let msg = [];
-            //     msg.push($scope.userMessage);
-            //     $scope.chatMessage = msg;
-            //     //   $timeout(function() {
-            //     //     $scope.chatMessage.push($scope.userMessage);
-            //     //}, 2000);
-            // }
-            console.log($scope.chatMessage);
-        }
-
-        //$scope.receive();
 
         $scope.send = function(textSent) {
             $scope.userMessage.text = textSent;
             $scope.userMessage.css = "outgoing";
             $scope.userMessage.type = "user";
-            let user = {...$scope.userMessage
-            };
-            $scope.chatMessage.push(user);
-            // if ($scope.chatMessage.length != 0 || $scope.chatMessage.length == 0) {
-            //     let msg = [];
-            //     msg.push($scope.userMessage);
-            //     $scope.chatMessage = msg;
-            // }
-            console.log($scope.chatMessage);
-            $scope.receive("bot");
+            if (textSent != null || textSent != undefined) {
+                let user = {...$scope.userMessage
+                };
+                $scope.chatMessage.push(user);
+                $scope.postContent(textSent).then(res => {
+                    console.log('response from lex', res)
+                    $scope.chatMessage = [...$scope.chatMessage, {
+                        text: res.message,
+                        css: "received",
+                        type: "bot"
+                    }];
+                    $scope.$apply();
+                });
+                $scope.textSent = '';
+            }
         }
-
-
     });
 </script>
 

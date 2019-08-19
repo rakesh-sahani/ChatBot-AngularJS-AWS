@@ -17,7 +17,12 @@ img {
     height: 10%;
     border-bottom: none;
     display: inline-block;
-    background-color: #007bff;
+    background: #67b26f;
+    /* fallback for old browsers */
+    background: -webkit-linear-gradient( to right, #4ca2cd, #67b26f);
+    /* Chrome 10-25, Safari 5.1-6 */
+    background: linear-gradient( to right, #4ca2cd, #67b26f);
+    /* background-color: #007bff; */
 }
 
 .msg-header-img {
@@ -75,7 +80,7 @@ img {
 }
 
 .msg-page {
-    height: 516px;
+    height: 250px;
     overflow-y: auto;
 }
 
